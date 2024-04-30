@@ -1,5 +1,3 @@
 runtime: go122
 
-handlers:
-- url: /cmd/.*
-  script: auto
+entrypoint: cmd/main
