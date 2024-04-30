@@ -1,5 +1,5 @@
 runtime: go122
 
 handlers:
-- url: /.*
+- url: /cmd/.*
   script: auto
