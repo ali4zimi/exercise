@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"slices"
+	"strconv"
 	"time"
 
 	"github.com/labstack/echo/v4"
@@ -166,6 +167,7 @@ func findAllBooks(coll *mongo.Collection) []map[string]interface{} {
 			"BookAuthor": res.BookAuthor,
 			"BookISBN":   res.BookISBN,
 			"BookPages":  res.BookPages,
+			"BookYear":   res.BookYear,
 		})
 	}
 
@@ -181,7 +183,7 @@ func main() {
 	defer cancel()
 
 	// TODO: make sure to pass the proper username, password, and port
-	client, err := mongo.Connect(ctx, options.Client().ApplyURI("mongodb://mongodb:testmongo@localhost:27017"))
+	client, err := mongo.Connect(ctx, options.Client().ApplyURI("mongodb://localhost:27017"))
 
 	// This is another way to specify the call of a function. You can define inline
 	// functions (or anonymous functions, similar to the behavior in Python)
@@ -223,11 +225,13 @@ func main() {
 	})
 
 	e.GET("/authors", func(c echo.Context) error {
-		return c.NoContent(http.StatusNoContent)
+		authors := findAllBooks(coll)
+		return c.Render(200, "author-table", authors)
 	})
 
 	e.GET("/years", func(c echo.Context) error {
-		return c.NoContent(http.StatusNoContent)
+		years := findAllBooks(coll)
+		return c.Render(200, "year-table", years)
 	})
 
 	e.GET("/search", func(c echo.Context) error {
@@ -235,7 +239,33 @@ func main() {
 	})
 
 	e.GET("/create", func(c echo.Context) error {
-		return c.NoContent(http.StatusNoContent)
+		return c.Render(200, "create-book", nil)
+	})
+
+	e.POST("/create", func(c echo.Context) error {
+		book := BookStore{
+			BookName:   c.FormValue("bookName"),
+			BookAuthor: c.FormValue("bookAuthor"),
+			BookISBN:   c.FormValue("bookISBN"),
+			BookPages:  func() int { i, _ := strconv.Atoi(c.FormValue("bookPages")); return i }(),
+			BookYear:   func() int { i, _ := strconv.Atoi(c.FormValue("bookYear")); return i }(),
+		}
+
+		_, err := coll.InsertOne(context.TODO(), book)
+		if err != nil {
+			panic(err)
+		}
+
+		return c.Redirect(http.StatusFound, "/books")
+	})
+
+	e.DELETE("/books/:id", func(c echo.Context) error {
+		_, err := coll.DeleteOne(context.TODO(), bson.M{"_id": c.Param("id")})
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		return c.Redirect(http.StatusFound, "/books")
 	})
 
 	e.GET("/api/books", func(c echo.Context) error {

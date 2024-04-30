@@ -19,16 +19,16 @@
     <div hx-get="/books" hx-trigger="click" hx-target="#page-content" class="p-pointer">
       <span style="padding: 8px 0px; display: block;">Books</span>
     </div>
-    <div hx-get="/authors" hx-trigger="click" class="p-pointer">
+    <div hx-get="/authors" hx-trigger="click" hx-target="#page-content" class="p-pointer">
       <span style="padding: 8px 0px; display: block;">Authors</span>
     </div>
-    <div hx-get="/years" hx-trigger="click" class="p-pointer">
+    <div hx-get="/years" hx-trigger="click" hx-target="#page-content" class="p-pointer">
       <span style="padding: 8px 0px; display: block;">Years</span>
     </div>
     <div hx-get="/search" hx-trigger="click" hx-target="#page-content" class="p-pointer">
       <span style="padding: 8px 0px; display: block;">Search</span>
     </div>
-    <div hx-get="/create" hx-trigger="click" class="p-pointer">
+    <div hx-get="/create" hx-trigger="click" hx-target="#page-content" class="p-pointer">
       <span style="padding: 8px 0px; display: block;">Create</span>
     </div>
   </div>
@@ -70,6 +70,7 @@
     <th>Author</th>
     <th>ISBN</th>
     <th>Pages</th>
+    <th>Options</th>
   </tr>
   {{ range . }}
   <tr id="row-{{ .ID }}">
@@ -77,6 +78,36 @@
     <th> {{ .BookAuthor }} </th>
     <th> {{ .BookISBN }} </th>
     <th> {{ .BookPages }} </th>
+    <th>
+      <button hx-delete="/delete/{{ .ID }}" class="btn">Delete</button>
+    </th>
+  </tr>
+  {{ end }}
+</table>
+{{ end }}
+
+{{ block "author-table" . }}
+<table>
+  <tr>
+    <th>Author</th>
+  </tr>
+  {{ range . }}
+  <tr id="row-{{ .ID }}">
+    <th> {{ .BookAuthor }} </th>
+  </tr>
+  {{ end }}
+</table>
+{{ end }}
+
+
+{{ block "year-table" . }}
+<table>
+  <tr>
+    <th>Years</th>
+  </tr>
+  {{ range . }}
+  <tr id="row-{{ .ID }}">
+    <th> {{ .BookYear }} </th>
   </tr>
   {{ end }}
 </table>
@@ -88,4 +119,30 @@
   <input type="text" required />
   <label>Search parameter</label>
 </div>
+{{ end }}
+
+
+{{ block "create-book" . }}
+
+<form hx-post="/create">
+  <div class="input_wrap" style="margin-bottom: 5px;">
+    <input type="text" name="bookName" required />
+    <label>Name</label>
+  </div>
+  <div class="input_wrap" style="margin-bottom: 5px;">
+    <input type="text" name="bookAuthor" required />
+    <label>Author</label>
+  </div>
+  <div class="input_wrap" style="margin-bottom: 5px;">
+    <input type="text" name="bookISBN" required />
+    <label>ISBN</label>
+  </div>
+  <div class="input_wrap" style="margin-bottom: 5px;">
+    <input type="text" name="bookPages" required />
+    <label>Pages</label>
+  </div>
+  <button type="submit" class="btn">Submit</button>
+</form>
+
+
 {{ end }}
