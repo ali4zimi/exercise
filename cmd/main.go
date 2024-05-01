@@ -183,7 +183,7 @@ func main() {
 	defer cancel()
 
 	// TODO: make sure to pass the proper username, password, and port
-	client, err := mongo.Connect(ctx, options.Client().ApplyURI("mongodb://localhost:27017"))
+	client, err := mongo.Connect(ctx, options.Client().ApplyURI("mongodb+srv://alibabaazimi:tSqT8sll6hMta6Hp@cc-exercise.2nboky2.mongodb.net"))
 
 	// This is another way to specify the call of a function. You can define inline
 	// functions (or anonymous functions, similar to the behavior in Python)
@@ -271,6 +271,20 @@ func main() {
 	e.GET("/api/books", func(c echo.Context) error {
 		books := findAllBooks(coll)
 		return c.JSON(http.StatusOK, books)
+	})
+
+	e.GET("/api/books/:id", func(c echo.Context) error {
+		id, err := primitive.ObjectIDFromHex(c.Param("id"))
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid id"})
+		}
+
+		var book BookStore
+		if err = coll.FindOne(context.TODO(), bson.M{"_id": id}).Decode(&book); err != nil {
+			return c.JSON(http.StatusNotFound, map[string]string{"error": "book not found"})
+		}
+
+		return c.JSON(http.StatusOK, book)
 	})
 
 	e.Logger.Fatal(e.Start(":3030"))
