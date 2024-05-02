@@ -255,8 +255,7 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
-
-		return c.Redirect(http.StatusFound, "/books")
+		return c.Redirect(http.StatusCreated, "/books")
 	})
 
 	e.DELETE("/books/:id", func(c echo.Context) error {
@@ -285,6 +284,22 @@ func main() {
 		}
 
 		return c.JSON(http.StatusOK, book)
+	})
+
+	e.POST("/api/books", func(c echo.Context) error {
+		book := BookStore{
+			BookName:   c.FormValue("bookName"),
+			BookAuthor: c.FormValue("bookAuthor"),
+			BookISBN:   c.FormValue("bookISBN"),
+			BookPages:  func() int { i, _ := strconv.Atoi(c.FormValue("bookPages")); return i }(),
+			BookYear:   func() int { i, _ := strconv.Atoi(c.FormValue("bookYear")); return i }(),
+		}
+
+		_, err := coll.InsertOne(context.TODO(), book)
+		if err != nil {
+			panic(err)
+		}
+		return c.Redirect(http.StatusCreated, "/books")
 	})
 
 	e.Logger.Fatal(e.Start(":3030"))
