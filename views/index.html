@@ -79,7 +79,7 @@
     <th> {{ .BookISBN }} </th>
     <th> {{ .BookPages }} </th>
     <th>
-      <button hx-delete="/delete/{{ .ID }}" class="btn">Delete</button>
+      <button hx-delete="/api/books/{{ .ID }}" hx-targe="#page-content" class="btn">Delete</button>
     </th>
   </tr>
   {{ end }}
@@ -124,7 +124,7 @@
 
 {{ block "create-book" . }}
 
-<form hx-post="/create">
+<form hx-post="/api/books">
   <div class="input_wrap" style="margin-bottom: 5px;">
     <input type="text" name="bookName" required />
     <label>Name</label>

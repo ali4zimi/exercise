@@ -242,31 +242,6 @@ func main() {
 		return c.Render(200, "create-book", nil)
 	})
 
-	e.POST("/create", func(c echo.Context) error {
-		book := BookStore{
-			BookName:   c.FormValue("bookName"),
-			BookAuthor: c.FormValue("bookAuthor"),
-			BookISBN:   c.FormValue("bookISBN"),
-			BookPages:  func() int { i, _ := strconv.Atoi(c.FormValue("bookPages")); return i }(),
-			BookYear:   func() int { i, _ := strconv.Atoi(c.FormValue("bookYear")); return i }(),
-		}
-
-		_, err := coll.InsertOne(context.TODO(), book)
-		if err != nil {
-			panic(err)
-		}
-		return c.Redirect(http.StatusCreated, "/books")
-	})
-
-	e.DELETE("/books/:id", func(c echo.Context) error {
-		_, err := coll.DeleteOne(context.TODO(), bson.M{"_id": c.Param("id")})
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		return c.Redirect(http.StatusFound, "/books")
-	})
-
 	e.GET("/api/books", func(c echo.Context) error {
 		books := findAllBooks(coll)
 		return c.JSON(http.StatusOK, books)
@@ -299,7 +274,21 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
-		return c.Redirect(http.StatusCreated, "/books")
+
+		return c.Redirect(http.StatusCreated, "/")
+	})
+
+	e.DELETE("/api/books/:id", func(c echo.Context) error {
+		id, err := primitive.ObjectIDFromHex(c.Param("id"))
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid id"})
+		}
+
+		if _, err = coll.DeleteOne(context.TODO(), bson.M{"_id": id}); err != nil {
+			return c.JSON(http.StatusNotFound, map[string]string{"error": "book not found"})
+		}
+
+		return c.JSON(http.StatusOK, map[string]string{"message": "book deleted"})
 	})
 
 	e.Logger.Fatal(e.Start(":3030"))
