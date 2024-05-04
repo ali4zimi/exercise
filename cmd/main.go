@@ -183,7 +183,9 @@ func main() {
 	defer cancel()
 
 	// TODO: make sure to pass the proper username, password, and port
-	client, err := mongo.Connect(ctx, options.Client().ApplyURI("mongodb+srv://alibabaazimi:tSqT8sll6hMta6Hp@cc-exercise.2nboky2.mongodb.net"))
+	client, err := mongo.Connect(ctx, options.Client().ApplyURI("mongodb://localhost:27017"))
+
+	// mongodb+srv://alibabaazimi:tSqT8sll6hMta6Hp@cc-exercise.2nboky2.mongodb.net/?retryWrites=true&w=majority&appName=cc-exercise
 
 	// This is another way to specify the call of a function. You can define inline
 	// functions (or anonymous functions, similar to the behavior in Python)
@@ -242,6 +244,29 @@ func main() {
 		return c.Render(200, "create-book", nil)
 	})
 
+	e.GET("/edit/:id", func(c echo.Context) error {
+		id, err := primitive.ObjectIDFromHex(c.Param("id"))
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid id"})
+		}
+
+		var book BookStore
+		if err = coll.FindOne(context.TODO(), bson.M{"_id": id}).Decode(&book); err != nil {
+			return c.JSON(http.StatusNotFound, map[string]string{"error": "book not found"})
+		}
+
+		b := map[string]interface{}{
+			"ID":         book.ID.Hex(),
+			"BookName":   book.BookName,
+			"BookAuthor": book.BookAuthor,
+			"BookISBN":   book.BookISBN,
+			"BookPages":  book.BookPages,
+			"BookYear":   book.BookYear,
+		}
+
+		return c.Render(200, "edit-book", b)
+	})
+
 	e.GET("/api/books", func(c echo.Context) error {
 		books := findAllBooks(coll)
 		return c.JSON(http.StatusOK, books)
@@ -270,12 +295,46 @@ func main() {
 			BookYear:   func() int { i, _ := strconv.Atoi(c.FormValue("bookYear")); return i }(),
 		}
 
-		_, err := coll.InsertOne(context.TODO(), book)
-		if err != nil {
-			panic(err)
+		books := findAllBooks(coll)
+
+		// check if book already exists
+		for _, b := range books {
+			if b["BookName"] == book.BookName && b["BookAuthor"] == book.BookAuthor && b["BookISBN"] == book.BookISBN {
+				// return 200
+				return c.JSON(http.StatusOK, "book already exists")
+
+			}
 		}
 
-		return c.Redirect(http.StatusCreated, "/")
+		// insert book into database
+		result, err := coll.InsertOne(context.TODO(), book)
+		if err != nil {
+			// return 304
+			return c.JSON(http.StatusNotModified, map[string]string{"error": "book not created"})
+		}
+
+		// return 201
+		return c.JSON(http.StatusCreated, "book created with id: "+result.InsertedID.(primitive.ObjectID).Hex())
+	})
+
+	e.PUT("/api/books", func(c echo.Context) error {
+		id, err := primitive.ObjectIDFromHex(c.FormValue("id"))
+
+		book := BookStore{
+			BookName:   c.FormValue("bookName"),
+			BookAuthor: c.FormValue("bookAuthor"),
+			BookISBN:   c.FormValue("bookISBN"),
+			BookPages:  func() int { i, _ := strconv.Atoi(c.FormValue("bookPages")); return i }(),
+			BookYear:   func() int { i, _ := strconv.Atoi(c.FormValue("bookYear")); return i }(),
+		}
+
+		// update book in database
+		_, err = coll.UpdateOne(context.TODO(), bson.M{"_id": id}, bson.M{"$set": book})
+		if err != nil {
+			return c.JSON(http.StatusNotModified, map[string]string{"error": "book not updated"})
+		}
+
+		return c.JSON(http.StatusOK, "book updated")
 	})
 
 	e.DELETE("/api/books/:id", func(c echo.Context) error {

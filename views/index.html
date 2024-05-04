@@ -79,7 +79,8 @@
     <th> {{ .BookISBN }} </th>
     <th> {{ .BookPages }} </th>
     <th>
-      <button hx-delete="/api/books/{{ .ID }}" hx-targe="#page-content" class="btn">Delete</button>
+      <button hx-get="/edit/{{ .ID }}" hx-target="#page-content" class="btn">Edit</button>
+      <button hx-delete="/api/books/{{ .ID }}" hx-confirm="Are you sure you want to delete?" class="btn">Delete</button>
     </th>
   </tr>
   {{ end }}
@@ -141,8 +142,33 @@
     <input type="text" name="bookPages" required />
     <label>Pages</label>
   </div>
-  <button type="submit" class="btn">Submit</button>
+  <button type="submit" class="btn">Add Book</button>
 </form>
 
+{{ end }}
+
+
+{{ block "edit-book" . }}
+
+<form hx-put="/api/books">
+  <input type="hidden" name="id" value="{{ .ID }}" />
+  <div class="input_wrap" style="margin-bottom: 5px;">
+    <input type="text" name="bookName" value="{{ .BookName }}" required />
+    <label>Name</label>
+  </div>
+  <div class="input_wrap" style="margin-bottom: 5px;">
+    <input type="text" name="bookAuthor" value="{{ .BookAuthor }}" required />
+    <label>Author</label>
+  </div>
+  <div class="input_wrap" style="margin-bottom: 5px;">
+    <input type="text" name="bookISBN" value="{{ .BookISBN }}" required />
+    <label>ISBN</label>
+  </div>
+  <div class="input_wrap" style="margin-bottom: 5px;">
+    <input type="text" name="bookPages" value="{{ .BookPages }}" required />
+    <label>Pages</label>
+  </div>
+  <button type="submit" class="btn">Update Book</button>
+</form>
 
 {{ end }}
