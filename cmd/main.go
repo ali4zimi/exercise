@@ -289,11 +289,11 @@ func main() {
 
 	e.POST("/api/books", func(c echo.Context) error {
 		book := BookStore{
-			BookName:   c.FormValue("bookName"),
-			BookAuthor: c.FormValue("bookAuthor"),
-			BookISBN:   c.FormValue("bookISBN"),
-			BookPages:  func() int { i, _ := strconv.Atoi(c.FormValue("bookPages")); return i }(),
-			BookYear:   func() int { i, _ := strconv.Atoi(c.FormValue("bookYear")); return i }(),
+			BookName:   c.FormValue("name"),
+			BookAuthor: c.FormValue("author"),
+			BookISBN:   c.FormValue("isbn"),
+			BookPages:  func() int { i, _ := strconv.Atoi(c.FormValue("pages")); return i }(),
+			BookYear:   func() int { i, _ := strconv.Atoi(c.FormValue("year")); return i }(),
 		}
 
 		books := findAllBooks(coll)
@@ -322,11 +322,11 @@ func main() {
 		id, err := primitive.ObjectIDFromHex(c.FormValue("id"))
 
 		book := BookStore{
-			BookName:   c.FormValue("bookName"),
-			BookAuthor: c.FormValue("bookAuthor"),
-			BookISBN:   c.FormValue("bookISBN"),
-			BookPages:  func() int { i, _ := strconv.Atoi(c.FormValue("bookPages")); return i }(),
-			BookYear:   func() int { i, _ := strconv.Atoi(c.FormValue("bookYear")); return i }(),
+			BookName:   c.FormValue("name"),
+			BookAuthor: c.FormValue("author"),
+			BookISBN:   c.FormValue("isbn"),
+			BookPages:  func() int { i, _ := strconv.Atoi(c.FormValue("pages")); return i }(),
+			BookYear:   func() int { i, _ := strconv.Atoi(c.FormValue("year")); return i }(),
 		}
 
 		// update book in database

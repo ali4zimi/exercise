@@ -139,6 +139,10 @@
     <label>Pages</label>
   </div>
   <div class="input_wrap" style="margin-bottom: 5px;">
+    <input type="text" name="year" required />
+    <label>Year</label>
+  </div>
+  <div class="input_wrap" style="margin-bottom: 5px;">
     <input type="text" name="isbn" required />
     <label>ISBN</label>
   </div>
@@ -161,13 +165,18 @@
     <label>Author</label>
   </div>
   <div class="input_wrap" style="margin-bottom: 5px;">
-    <input type="text" name="isbn" value="{{ .BookISBN }}" required />
-    <label>ISBN</label>
-  </div>
-  <div class="input_wrap" style="margin-bottom: 5px;">
     <input type="text" name="pages" value="{{ .BookPages }}" required />
     <label>Pages</label>
   </div>
+  <div class="input_wrap" style="margin-bottom: 5px;">
+    <input type="text" name="year" required />
+    <label>Pages</label>
+  </div>
+  <div class="input_wrap" style="margin-bottom: 5px;">
+    <input type="text" name="isbn" value="{{ .BookISBN }}" required />
+    <label>ISBN</label>
+  </div>
+
   <button type="submit" class="btn">Update Book</button>
 </form>
 
