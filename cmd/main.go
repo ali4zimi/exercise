@@ -332,13 +332,13 @@ func main() {
 
 	e.PUT("/api/books", func(c echo.Context) error {
 		id, err := primitive.ObjectIDFromHex(c.FormValue("id"))
-		if err != nil {
-			return c.JSON(http.StatusNotModified, map[string]string{"error": "invalid id"})
-		}
+		// if err != nil {
+		// 	return c.JSON(http.StatusNotModified, map[string]string{"error": "invalid id"})
+		// }
 
-		if c.FormValue("name") == "" || c.FormValue("author") == "" || c.FormValue("isbn") == "" || c.FormValue("pages") == "" || c.FormValue("year") == "" {
-			return c.JSON(http.StatusNotModified, map[string]string{"error": "missing form data"})
-		}
+		// if c.FormValue("name") == "" || c.FormValue("author") == "" || c.FormValue("isbn") == "" || c.FormValue("pages") == "" || c.FormValue("year") == "" {
+		// 	return c.JSON(http.StatusNotModified, map[string]string{"error": "missing form data"})
+		// }
 
 		book := BookStore{
 			BookName:   c.FormValue("name"),
@@ -348,16 +348,16 @@ func main() {
 			BookYear:   func() int { i, _ := strconv.Atoi(c.FormValue("year")); return i }(),
 		}
 
-		books := findAllBooks(coll)
+		// books := findAllBooks(coll)
 
 		// check if book already exists
-		for _, b := range books {
-			if b["name"] == book.BookName && b["author"] == book.BookAuthor && b["isbn"] == book.BookISBN {
-				// return 200
-				return c.JSON(http.StatusOK, "book already exists")
+		// for _, b := range books {
+		// 	if b["name"] == book.BookName && b["author"] == book.BookAuthor && b["isbn"] == book.BookISBN {
+		// 		// return 200
+		// 		return c.JSON(http.StatusOK, "book already exists")
 
-			}
-		}
+		// 	}
+		// }
 
 		// update book in database
 		_, err = coll.UpdateOne(context.TODO(), bson.M{"_id": id}, bson.M{"$set": book})
