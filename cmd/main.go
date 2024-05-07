@@ -309,7 +309,7 @@ func main() {
 
 		// check if book already exists
 		for _, b := range books {
-			if b["BookName"] == book.BookName && b["BookAuthor"] == book.BookAuthor && b["BookISBN"] == book.BookISBN {
+			if b["name"] == book.BookName && b["author"] == book.BookAuthor && b["isbn"] == book.BookISBN {
 				// return 200
 				return c.JSON(http.StatusOK, "book already exists")
 
