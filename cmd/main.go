@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"slices"
+	"strconv"
 	"time"
 
 	"github.com/labstack/echo/v4"
@@ -297,43 +298,64 @@ func main() {
 	})
 
 	e.POST("/api/books", func(c echo.Context) error {
-		var book BookStore
-		if err := c.Bind(&book); err != nil {
-			return err
+		if c.FormValue("name") == "" || c.FormValue("author") == "" || c.FormValue("isbn") == "" || c.FormValue("pages") == "" || c.FormValue("year") == "" {
+			return c.JSON(http.StatusNotModified, map[string]string{"error": "missing form data"})
 		}
 
-		_, err := coll.InsertOne(context.Background(), book)
-		if err != nil {
-			return err
+		book := BookStore{
+			BookName:   c.FormValue("name"),
+			BookAuthor: c.FormValue("author"),
+			BookISBN:   c.FormValue("isbn"),
+			BookPages:  func() int { i, _ := strconv.Atoi(c.FormValue("pages")); return i }(),
+			BookYear:   func() int { i, _ := strconv.Atoi(c.FormValue("year")); return i }(),
 		}
-		return c.NoContent(http.StatusOK)
+
+		books := findAllBooks(coll)
+		for _, b := range books {
+			if b["name"] == book.BookName && b["author"] == book.BookAuthor && b["isbn"] == book.BookISBN && b["pages"] == book.BookPages && b["year"] == book.BookYear {
+				return c.JSON(http.StatusOK, "book already exists")
+			}
+
+		}
+
+		result, err := coll.InsertOne(context.TODO(), book)
+		if err != nil {
+			return c.JSON(http.StatusNotModified, map[string]string{"error": "book not created"})
+		}
+
+		return c.JSON(http.StatusCreated, "book created with id: "+result.InsertedID.(primitive.ObjectID).Hex())
 	})
 
 	e.PUT("/api/books", func(c echo.Context) error {
-		var book BookStore
-		if err := c.Bind(&book); err != nil {
-			return err
+		id, err := primitive.ObjectIDFromHex(c.FormValue("id"))
+
+		book := BookStore{
+			BookName:   c.FormValue("name"),
+			BookAuthor: c.FormValue("author"),
+			BookISBN:   c.FormValue("isbn"),
+			BookPages:  func() int { i, _ := strconv.Atoi(c.FormValue("pages")); return i }(),
+			BookYear:   func() int { i, _ := strconv.Atoi(c.FormValue("year")); return i }(),
 		}
-		// Update the book in the database
-		_, err := coll.ReplaceOne(context.Background(), bson.M{"_id": book.ID}, book)
+
+		_, err = coll.UpdateOne(context.TODO(), bson.M{"_id": id}, bson.M{"$set": book})
 		if err != nil {
-			return err
+			return c.JSON(http.StatusNotModified, map[string]string{"error": "book not updated"})
 		}
-		return c.NoContent(http.StatusOK)
+
+		return c.JSON(http.StatusOK, "book updated")
 	})
 
 	e.DELETE("/api/books/:id", func(c echo.Context) error {
-		id := c.Param("id")
-		objID, err := primitive.ObjectIDFromHex(id)
+		id, err := primitive.ObjectIDFromHex(c.Param("id"))
 		if err != nil {
-			return err
+			return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid id"})
 		}
-		// Delete the book from the database
-		_, err = coll.DeleteOne(context.Background(), bson.M{"_id": objID})
-		if err != nil {
-			return err
+
+		if _, err = coll.DeleteOne(context.TODO(), bson.M{"_id": id}); err != nil {
+			return c.JSON(http.StatusNotFound, map[string]string{"error": "book not found"})
 		}
-		return c.NoContent(http.StatusOK)
+
+		return c.JSON(http.StatusOK, map[string]string{"message": "book deleted"})
 	})
 
 	e.Logger.Fatal(e.Start(":3030"))
