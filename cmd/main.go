@@ -374,18 +374,18 @@ func main() {
 		return c.JSON(http.StatusOK, "book updated")
 	})
 
-	e.DELETE("/api/books/:id", func(c echo.Context) error {
-		id, err := primitive.ObjectIDFromHex(c.Param("id"))
-		if err != nil {
-			return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid id"})
-		}
+	// e.DELETE("/api/books/:id", func(c echo.Context) error {
+	// 	id, err := primitive.ObjectIDFromHex(c.Param("id"))
+	// 	if err != nil {
+	// 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid id"})
+	// 	}
 
-		if _, err = coll.DeleteOne(context.TODO(), bson.M{"_id": id}); err != nil {
-			return c.JSON(http.StatusNotFound, map[string]string{"error": "book not found"})
-		}
+	// 	if _, err = coll.DeleteOne(context.TODO(), bson.M{"_id": id}); err != nil {
+	// 		return c.JSON(http.StatusNotFound, map[string]string{"error": "book not found"})
+	// 	}
 
-		return c.JSON(http.StatusOK, map[string]string{"message": "book deleted"})
-	})
+	// 	return c.JSON(http.StatusOK, map[string]string{"message": "book deleted"})
+	// })
 
 	e.Logger.Fatal(e.Start(":3030"))
 }
