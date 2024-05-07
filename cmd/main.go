@@ -319,7 +319,7 @@ func main() {
 
 			}
 
-			if b["name"] == book.BookName && b["author"] == book.BookAuthor && {
+			if b["name"] == book.BookName && b["author"] == book.BookAuthor {
 				// return 200
 				return c.JSON(http.StatusOK, "book already exists")
 			}
