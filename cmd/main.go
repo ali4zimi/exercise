@@ -162,12 +162,12 @@ func findAllBooks(coll *mongo.Collection) []map[string]interface{} {
 	var ret []map[string]interface{}
 	for _, res := range results {
 		ret = append(ret, map[string]interface{}{
-			"ID":         res.ID.Hex(),
-			"BookName":   res.BookName,
-			"BookAuthor": res.BookAuthor,
-			"BookISBN":   res.BookISBN,
-			"BookPages":  res.BookPages,
-			"BookYear":   res.BookYear,
+			"id":     res.ID.Hex(),
+			"name":   res.BookName,
+			"author": res.BookAuthor,
+			"isbn":   res.BookISBN,
+			"pages":  res.BookPages,
+			"year":   res.BookYear,
 		})
 	}
 
@@ -284,7 +284,16 @@ func main() {
 			return c.JSON(http.StatusNotFound, map[string]string{"error": "book not found"})
 		}
 
-		return c.JSON(http.StatusOK, book)
+		book_str := map[string]interface{}{
+			"id":     book.ID.Hex(),
+			"book":   book.BookName,
+			"author": book.BookAuthor,
+			"isbn":   book.BookISBN,
+			"pages":  book.BookPages,
+			"year":   book.BookYear,
+		}
+
+		return c.JSON(http.StatusOK, book_str)
 	})
 
 	e.POST("/api/books", func(c echo.Context) error {
