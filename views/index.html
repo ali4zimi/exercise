@@ -169,8 +169,8 @@
     <label>Pages</label>
   </div>
   <div class="input_wrap" style="margin-bottom: 5px;">
-    <input type="text" name="year" required />
-    <label>Pages</label>
+    <input type="text" name="year" value="{{ .BookYear }}" required />
+    <label>Year</label>
   </div>
   <div class="input_wrap" style="margin-bottom: 5px;">
     <input type="text" name="isbn" value="{{ .BookISBN }}" required />
