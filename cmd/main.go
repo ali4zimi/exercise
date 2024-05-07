@@ -297,7 +297,7 @@ func main() {
 	})
 
 	e.POST("/api/books", func(c echo.Context) error {
-		if c.FormValue("name") == "" || c.FormValue("author") == "" || c.FormValue("isbn") == "" || c.FormValue("pages") == "" || c.FormValue("year") == "" {
+		if c.FormValue("name") == "" || c.FormValue("author") == "" || c.FormValue("isbn") == "" {
 			return c.JSON(http.StatusNotModified, map[string]string{"error": "missing form data"})
 		}
 
