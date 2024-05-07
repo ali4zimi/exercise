@@ -305,7 +305,7 @@ func main() {
 			BookYear:   func() int { i, _ := strconv.Atoi(c.FormValue("year")); return i }(),
 		}
 
-		if book.BookName != "" || book.BookAuthor != "" || book.BookISBN != "" {
+		if book.BookName != "" || book.BookAuthor != "" || book.BookISBN != "" || book.BookPages != 0 || book.BookYear != 0 {
 			// return 200
 			return c.JSON(http.StatusOK, "Some fields are empty")
 
@@ -343,7 +343,7 @@ func main() {
 			BookYear:   func() int { i, _ := strconv.Atoi(c.FormValue("year")); return i }(),
 		}
 
-		if book.BookName != "" || book.BookAuthor != "" || book.BookISBN != "" {
+		if book.BookName != "" || book.BookAuthor != "" || book.BookISBN != "" || book.BookPages != 0 || book.BookYear != 0 {
 			// return 200
 			return c.JSON(http.StatusOK, "Some fields are empty")
 
