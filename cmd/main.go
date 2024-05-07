@@ -8,7 +8,6 @@ import (
 	"log"
 	"net/http"
 	"slices"
-	"strconv"
 	"time"
 
 	"github.com/labstack/echo/v4"
@@ -298,89 +297,44 @@ func main() {
 	})
 
 	e.POST("/api/books", func(c echo.Context) error {
-		if c.FormValue("name") == "" || c.FormValue("author") == "" || c.FormValue("isbn") == "" || c.FormValue("pages") == "" || c.FormValue("year") == "" {
-			return c.JSON(http.StatusNotModified, map[string]string{"error": "missing form data"})
+		var book BookStore
+		if err := c.Bind(&book); err != nil {
+			return err
 		}
 
-		book := BookStore{
-			BookName:   c.FormValue("name"),
-			BookAuthor: c.FormValue("author"),
-			BookISBN:   c.FormValue("isbn"),
-			BookPages:  func() int { i, _ := strconv.Atoi(c.FormValue("pages")); return i }(),
-			BookYear:   func() int { i, _ := strconv.Atoi(c.FormValue("year")); return i }(),
-		}
-
-		books := findAllBooks(coll)
-		// check if book already exists
-		for _, b := range books {
-			if b["name"] == book.BookName && b["author"] == book.BookAuthor && b["isbn"] == book.BookISBN && b["pages"] == book.BookPages && b["year"] == book.BookYear {
-				// return 200
-				return c.JSON(http.StatusOK, "book already exists")
-			}
-
-		}
-
-		// insert book into database
-		result, err := coll.InsertOne(context.TODO(), book)
+		_, err := coll.InsertOne(context.Background(), book)
 		if err != nil {
-			// return 304
-			return c.JSON(http.StatusNotModified, map[string]string{"error": "book not created"})
+			return err
 		}
-
-		// return 201
-		return c.JSON(http.StatusCreated, "book created with id: "+result.InsertedID.(primitive.ObjectID).Hex())
+		return c.NoContent(http.StatusOK)
 	})
 
 	e.PUT("/api/books", func(c echo.Context) error {
-		id, err := primitive.ObjectIDFromHex(c.FormValue("id"))
-		// if err != nil {
-		// 	return c.JSON(http.StatusNotModified, map[string]string{"error": "invalid id"})
-		// }
-
-		// if c.FormValue("name") == "" || c.FormValue("author") == "" || c.FormValue("isbn") == "" || c.FormValue("pages") == "" || c.FormValue("year") == "" {
-		// 	return c.JSON(http.StatusNotModified, map[string]string{"error": "missing form data"})
-		// }
-
-		book := BookStore{
-			BookName:   c.FormValue("name"),
-			BookAuthor: c.FormValue("author"),
-			BookISBN:   c.FormValue("isbn"),
-			BookPages:  func() int { i, _ := strconv.Atoi(c.FormValue("pages")); return i }(),
-			BookYear:   func() int { i, _ := strconv.Atoi(c.FormValue("year")); return i }(),
+		var book BookStore
+		if err := c.Bind(&book); err != nil {
+			return err
 		}
-
-		// books := findAllBooks(coll)
-
-		// check if book already exists
-		// for _, b := range books {
-		// 	if b["name"] == book.BookName && b["author"] == book.BookAuthor && b["isbn"] == book.BookISBN {
-		// 		// return 200
-		// 		return c.JSON(http.StatusOK, "book already exists")
-
-		// 	}
-		// }
-
-		// update book in database
-		_, err = coll.UpdateOne(context.TODO(), bson.M{"_id": id}, bson.M{"$set": book})
+		// Update the book in the database
+		_, err := coll.ReplaceOne(context.Background(), bson.M{"_id": book.ID}, book)
 		if err != nil {
-			return c.JSON(http.StatusNotModified, map[string]string{"error": "book not updated"})
+			return err
 		}
-
-		return c.JSON(http.StatusOK, "book updated")
+		return c.NoContent(http.StatusOK)
 	})
 
-	// e.DELETE("/api/books/:id", func(c echo.Context) error {
-	// 	id, err := primitive.ObjectIDFromHex(c.Param("id"))
-	// 	if err != nil {
-	// 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid id"})
-	// 	}
-
-	// 	if _, err = coll.DeleteOne(context.TODO(), bson.M{"_id": id}); err != nil {
-	// 		return c.JSON(http.StatusNotFound, map[string]string{"error": "book not found"})
-	// 	}
-
-	// 	return c.JSON(http.StatusOK, map[string]string{"message": "book deleted"})
-	// })
+	e.DELETE("/api/books/:id", func(c echo.Context) error {
+		id := c.Param("id")
+		objID, err := primitive.ObjectIDFromHex(id)
+		if err != nil {
+			return err
+		}
+		// Delete the book from the database
+		_, err = coll.DeleteOne(context.Background(), bson.M{"_id": objID})
+		if err != nil {
+			return err
+		}
+		return c.NoContent(http.StatusOK)
+	})
 
 	e.Logger.Fatal(e.Start(":3030"))
 }
