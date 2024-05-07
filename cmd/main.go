@@ -276,7 +276,8 @@ func main() {
 	e.GET("/api/books/:id", func(c echo.Context) error {
 		id, err := primitive.ObjectIDFromHex(c.Param("id"))
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid id"})
+			// return 299
+			return c.JSON(http.StatusNotModified, map[string]string{"error": "invalid id"})
 		}
 
 		var book BookStore
