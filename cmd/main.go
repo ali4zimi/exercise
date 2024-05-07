@@ -305,8 +305,13 @@ func main() {
 			BookYear:   func() int { i, _ := strconv.Atoi(c.FormValue("year")); return i }(),
 		}
 
-		books := findAllBooks(coll)
+		if book.BookName != "" || book.BookAuthor != "" || book.BookISBN != "" {
+			// return 200
+			return c.JSON(http.StatusOK, "Some fields are empty")
 
+		}
+
+		books := findAllBooks(coll)
 		// check if book already exists
 		for _, b := range books {
 			if b["name"] == book.BookName && b["author"] == book.BookAuthor && b["isbn"] == book.BookISBN {
