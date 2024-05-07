@@ -297,18 +297,16 @@ func main() {
 	})
 
 	e.POST("/api/books", func(c echo.Context) error {
+		if c.FormValue("name") == "" || c.FormValue("author") == "" || c.FormValue("isbn") == "" || c.FormValue("pages") == "" || c.FormValue("year") == "" {
+			return c.JSON(http.StatusBadRequest, map[string]string{"error": "missing form data"})
+		}
+
 		book := BookStore{
 			BookName:   c.FormValue("name"),
 			BookAuthor: c.FormValue("author"),
 			BookISBN:   c.FormValue("isbn"),
 			BookPages:  func() int { i, _ := strconv.Atoi(c.FormValue("pages")); return i }(),
 			BookYear:   func() int { i, _ := strconv.Atoi(c.FormValue("year")); return i }(),
-		}
-
-		if book.BookName != "" || book.BookAuthor != "" || book.BookISBN != "" || book.BookPages != 0 || book.BookYear != 0 {
-			// return 200
-			return c.JSON(http.StatusOK, "Some fields are empty")
-
 		}
 
 		books := findAllBooks(coll)
@@ -334,6 +332,13 @@ func main() {
 
 	e.PUT("/api/books", func(c echo.Context) error {
 		id, err := primitive.ObjectIDFromHex(c.FormValue("id"))
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid id"})
+		}
+
+		if c.FormValue("name") == "" || c.FormValue("author") == "" || c.FormValue("isbn") == "" || c.FormValue("pages") == "" || c.FormValue("year") == "" {
+			return c.JSON(http.StatusBadRequest, map[string]string{"error": "missing form data"})
+		}
 
 		book := BookStore{
 			BookName:   c.FormValue("name"),
@@ -341,12 +346,6 @@ func main() {
 			BookISBN:   c.FormValue("isbn"),
 			BookPages:  func() int { i, _ := strconv.Atoi(c.FormValue("pages")); return i }(),
 			BookYear:   func() int { i, _ := strconv.Atoi(c.FormValue("year")); return i }(),
-		}
-
-		if book.BookName != "" || book.BookAuthor != "" || book.BookISBN != "" || book.BookPages != 0 || book.BookYear != 0 {
-			// return 200
-			return c.JSON(http.StatusOK, "Some fields are empty")
-
 		}
 
 		books := findAllBooks(coll)
