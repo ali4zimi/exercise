@@ -298,7 +298,7 @@ func main() {
 
 	e.POST("/api/books", func(c echo.Context) error {
 		if c.FormValue("name") == "" || c.FormValue("author") == "" || c.FormValue("isbn") == "" || c.FormValue("pages") == "" || c.FormValue("year") == "" {
-			return c.JSON(http.StatusBadRequest, map[string]string{"error": "missing form data"})
+			return c.JSON(http.StatusNotModified, map[string]string{"error": "missing form data"})
 		}
 
 		book := BookStore{
@@ -333,11 +333,11 @@ func main() {
 	e.PUT("/api/books", func(c echo.Context) error {
 		id, err := primitive.ObjectIDFromHex(c.FormValue("id"))
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid id"})
+			return c.JSON(http.StatusNotModified, map[string]string{"error": "invalid id"})
 		}
 
 		if c.FormValue("name") == "" || c.FormValue("author") == "" || c.FormValue("isbn") == "" || c.FormValue("pages") == "" || c.FormValue("year") == "" {
-			return c.JSON(http.StatusBadRequest, map[string]string{"error": "missing form data"})
+			return c.JSON(http.StatusNotModified, map[string]string{"error": "missing form data"})
 		}
 
 		book := BookStore{
