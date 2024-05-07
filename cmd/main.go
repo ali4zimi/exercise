@@ -298,7 +298,7 @@ func main() {
 	})
 
 	e.POST("/api/books", func(c echo.Context) error {
-		if c.FormValue("name") == "" || c.FormValue("author") == "" || c.FormValue("isbn") == "" {
+		if c.FormValue("name") == "" || c.FormValue("author") == "" || c.FormValue("isbn") == "" || c.FormValue("pages") == "" || c.FormValue("year") == "" {
 			return c.JSON(http.StatusNotModified, map[string]string{"error": "missing form data"})
 		}
 
@@ -313,16 +313,11 @@ func main() {
 		books := findAllBooks(coll)
 		// check if book already exists
 		for _, b := range books {
-			if b["isbn"] == book.BookISBN {
-				// return 200
-				return c.JSON(http.StatusOK, "book already exists")
-
-			}
-
-			if b["name"] == book.BookName && b["author"] == book.BookAuthor {
+			if b["name"] == book.BookName && b["author"] == book.BookAuthor && b["isbn"] == book.BookISBN && b["pages"] == book.BookPages && b["year"] == book.BookYear {
 				// return 200
 				return c.JSON(http.StatusOK, "book already exists")
 			}
+
 		}
 
 		// insert book into database
