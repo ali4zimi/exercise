@@ -313,10 +313,15 @@ func main() {
 		books := findAllBooks(coll)
 		// check if book already exists
 		for _, b := range books {
-			if b["name"] == book.BookName && b["author"] == book.BookAuthor && b["isbn"] == book.BookISBN {
+			if b["isbn"] == book.BookISBN {
 				// return 200
 				return c.JSON(http.StatusOK, "book already exists")
 
+			}
+
+			if b["name"] == book.BookName && b["author"] == book.BookAuthor && {
+				// return 200
+				return c.JSON(http.StatusOK, "book already exists")
 			}
 		}
 
