@@ -298,9 +298,9 @@ func main() {
 	})
 
 	e.POST("/api/books", func(c echo.Context) error {
-		// if c.FormValue("name") == "" || c.FormValue("author") == "" || c.FormValue("isbn") == "" || c.FormValue("pages") == "" || c.FormValue("year") == "" {
-		// 	return c.JSON(http.StatusOK, map[string]string{"error": "missing form data"})
-		// }
+		if c.FormValue("name") == "" || c.FormValue("author") == "" || c.FormValue("isbn") == "" || c.FormValue("pages") == "" || c.FormValue("year") == "" {
+			return c.JSON(http.StatusOK, map[string]string{"error": "missing form data"})
+		}
 
 		book := BookStore{
 			BookName:   c.FormValue("name"),
