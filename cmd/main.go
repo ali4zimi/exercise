@@ -299,7 +299,7 @@ func main() {
 
 	e.POST("/api/books", func(c echo.Context) error {
 		if c.FormValue("name") == "" || c.FormValue("author") == "" || c.FormValue("isbn") == "" || c.FormValue("pages") == "" || c.FormValue("year") == "" {
-			return c.JSON(http.StatusNotModified, map[string]string{"error": "missing form data"})
+			return c.JSON(http.StatusOK, map[string]string{"error": "missing form data"})
 		}
 
 		book := BookStore{
@@ -313,14 +313,14 @@ func main() {
 		books := findAllBooks(coll)
 		for _, b := range books {
 			if b["name"] == book.BookName && b["author"] == book.BookAuthor && b["isbn"] == book.BookISBN && b["pages"] == book.BookPages && b["year"] == book.BookYear {
-				return c.JSON(http.StatusOK, "book already exists")
+				return c.JSON(http.StatusNotModified, "book already exists")
 			}
 
 		}
 
 		result, err := coll.InsertOne(context.TODO(), book)
 		if err != nil {
-			return c.JSON(http.StatusNotModified, map[string]string{"error": "book not created"})
+			return c.JSON(http.StatusOK, map[string]string{"error": "book not created"})
 		}
 
 		return c.JSON(http.StatusCreated, "book created with id: "+result.InsertedID.(primitive.ObjectID).Hex())
