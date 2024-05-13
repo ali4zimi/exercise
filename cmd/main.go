@@ -326,37 +326,37 @@ func main() {
 		return c.JSON(http.StatusCreated, "book created with id: "+result.InsertedID.(primitive.ObjectID).Hex())
 	})
 
-	e.PUT("/api/books", func(c echo.Context) error {
-		id, err := primitive.ObjectIDFromHex(c.FormValue("id"))
+	// e.PUT("/api/books", func(c echo.Context) error {
+	// 	id, err := primitive.ObjectIDFromHex(c.FormValue("id"))
 
-		book := BookStore{
-			BookName:   c.FormValue("name"),
-			BookAuthor: c.FormValue("author"),
-			BookISBN:   c.FormValue("isbn"),
-			BookPages:  func() int { i, _ := strconv.Atoi(c.FormValue("pages")); return i }(),
-			BookYear:   func() int { i, _ := strconv.Atoi(c.FormValue("year")); return i }(),
-		}
+	// 	book := BookStore{
+	// 		BookName:   c.FormValue("name"),
+	// 		BookAuthor: c.FormValue("author"),
+	// 		BookISBN:   c.FormValue("isbn"),
+	// 		BookPages:  func() int { i, _ := strconv.Atoi(c.FormValue("pages")); return i }(),
+	// 		BookYear:   func() int { i, _ := strconv.Atoi(c.FormValue("year")); return i }(),
+	// 	}
 
-		_, err = coll.UpdateOne(context.TODO(), bson.M{"_id": id}, bson.M{"$set": book})
-		if err != nil {
-			return c.JSON(http.StatusNotModified, map[string]string{"error": "book not updated"})
-		}
+	// 	_, err = coll.UpdateOne(context.TODO(), bson.M{"_id": id}, bson.M{"$set": book})
+	// 	if err != nil {
+	// 		return c.JSON(http.StatusNotModified, map[string]string{"error": "book not updated"})
+	// 	}
 
-		return c.JSON(http.StatusOK, "book updated")
-	})
+	// 	return c.JSON(http.StatusOK, "book updated")
+	// })
 
-	e.DELETE("/api/books/:id", func(c echo.Context) error {
-		id, err := primitive.ObjectIDFromHex(c.Param("id"))
-		if err != nil {
-			return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid id"})
-		}
+	// e.DELETE("/api/books/:id", func(c echo.Context) error {
+	// 	id, err := primitive.ObjectIDFromHex(c.Param("id"))
+	// 	if err != nil {
+	// 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid id"})
+	// 	}
 
-		if _, err = coll.DeleteOne(context.TODO(), bson.M{"_id": id}); err != nil {
-			return c.JSON(http.StatusNotFound, map[string]string{"error": "book not found"})
-		}
+	// 	if _, err = coll.DeleteOne(context.TODO(), bson.M{"_id": id}); err != nil {
+	// 		return c.JSON(http.StatusNotFound, map[string]string{"error": "book not found"})
+	// 	}
 
-		return c.JSON(http.StatusOK, map[string]string{"message": "book deleted"})
-	})
+	// 	return c.JSON(http.StatusOK, map[string]string{"message": "book deleted"})
+	// })
 
 	e.Logger.Fatal(e.Start(":3030"))
 }
