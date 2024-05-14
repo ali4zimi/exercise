@@ -302,7 +302,7 @@ func main() {
 			return c.JSON(304, map[string]string{"error": "invalid request"})
 		}
 
-		if book.BookName == "" || book.BookAuthor == "" || book.BookISBN == "" {
+		if book.BookName == "" || book.BookAuthor == "" || book.BookISBN == "" || book.BookPages <= 0 || book.BookYear <= 0 {
 			return c.JSON(304, map[string]string{"error": "missing fields"})
 		}
 
@@ -335,11 +335,20 @@ func main() {
 			return c.JSON(299, map[string]string{"error": "invalid request"})
 		}
 
-		if book.BookName == "" || book.BookAuthor == "" || book.BookISBN == "" || book.BookPages == 0 || book.BookYear == 0 {
+		// check if the book exists
+		books := findAllBooks(coll)
+
+		if book.BookName == "" || book.BookAuthor == "" || book.BookISBN == "" || book.BookPages <= 0 || book.BookYear <= 0 {
 			return c.JSON(299, map[string]string{"error": "missing fields"})
 		}
 
-		books := findAllBooks(coll)
+		exists := false
+		for _, b := range books {
+			if b["id"] == book.ID.Hex() {
+				exists = true
+				break
+			}
+		}
 
 		for _, b := range books {
 			if b["name"] == book.BookName && b["author"] == book.BookAuthor && b["isbn"] == book.BookISBN && b["pages"] == book.BookPages && b["year"] == book.BookYear {
@@ -349,6 +358,10 @@ func main() {
 			}
 		}
 
+		if !exists {
+			return c.JSON(299, map[string]string{"error": "book does not exist"})
+
+		}
 		result, err := coll.UpdateOne(context.TODO(), bson.M{"_id": book.ID}, bson.M{"$set": book})
 
 		if err != nil {
