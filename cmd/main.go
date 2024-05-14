@@ -310,7 +310,7 @@ func main() {
 
 		// check if book already exists
 		for _, b := range books {
-			if b["name"] == book.BookName && b["author"] == book.BookAuthor && b["isbn"] == book.BookISBN {
+			if b["name"] == book.BookName && b["author"] == book.BookAuthor && b["isbn"] == book.BookISBN && b["pages"] == book.BookPages && b["year"] == book.BookYear {
 				// return 200
 				return c.JSON(304, "book already exists")
 
@@ -332,17 +332,17 @@ func main() {
 		book := new(BookStore)
 
 		if err := c.Bind(book); err != nil {
-			return c.JSON(304, map[string]string{"error": "invalid request"})
+			return c.JSON(299, map[string]string{"error": "invalid request"})
 		}
 
 		if book.BookName == "" || book.BookAuthor == "" || book.BookISBN == "" {
-			return c.JSON(304, map[string]string{"error": "missing fields"})
+			return c.JSON(299, map[string]string{"error": "missing fields"})
 		}
 
 		result, err := coll.UpdateOne(context.TODO(), bson.M{"_id": book.ID}, bson.M{"$set": book})
 
 		if err != nil {
-			return c.JSON(http.StatusInternalServerError, map[string]string{"error": "failed to update book"})
+			return c.JSON(299, map[string]string{"error": "failed to update book"})
 		}
 
 		return c.JSON(http.StatusOK, result)
