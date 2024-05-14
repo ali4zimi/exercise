@@ -306,8 +306,17 @@ func main() {
 			return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid json format"})
 		}
 
-		// 2. Validate the data (optional)
-		// You can add checks here to ensure required fields are present and have valid values
+		if newBook.BookName == "" || newBook.BookAuthor == "" || newBook.BookISBN == "" {
+			return c.JSON(http.StatusBadRequest, map[string]string{"error": "name and author are required fields"})
+		}
+
+		if newBook.BookPages <= 0 {
+			return c.JSON(http.StatusBadRequest, map[string]string{"error": "pages must be a positive number"})
+		}
+
+		if newBook.BookYear <= 0 {
+			return c.JSON(http.StatusBadRequest, map[string]string{"error": "year must be a positive number"})
+		}
 
 		// 3. Insert the new book into the database
 		result, err := coll.InsertOne(context.TODO(), newBook)
