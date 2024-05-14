@@ -298,10 +298,10 @@ func main() {
 
 	e.POST("/api/books", func(c echo.Context) error {
 		book := new(BookStore)
-		fmt.Println(book)
 		if err := c.Bind(book); err != nil {
 			return c.JSON(304, map[string]string{"error": "invalid request"})
 		}
+		fmt.Println(book)
 
 		if book.BookName == "" || book.BookAuthor == "" || book.BookISBN == "" {
 			return c.JSON(304, map[string]string{"error": "missing fields"})
@@ -331,11 +331,11 @@ func main() {
 
 	e.PUT("/api/books", func(c echo.Context) error {
 		book := new(BookStore)
-		fmt.Println(book)
 
 		if err := c.Bind(book); err != nil {
 			return c.JSON(299, map[string]string{"error": "invalid request"})
 		}
+		fmt.Println(book)
 
 		if book.BookName == "" || book.BookAuthor == "" || book.BookISBN == "" {
 			return c.JSON(299, map[string]string{"error": "missing fields"})
