@@ -308,10 +308,8 @@ func main() {
 
 		books := findAllBooks(coll)
 
-		// check if book already exists
 		for _, b := range books {
 			if b["name"] == book.BookName && b["author"] == book.BookAuthor && b["isbn"] == book.BookISBN && b["pages"] == book.BookPages && b["year"] == book.BookYear {
-				// return 200
 				return c.JSON(304, "book already exists")
 
 			}
@@ -319,7 +317,8 @@ func main() {
 
 		book.ID = primitive.NewObjectID()
 
-		// Insert the book into the database
+		fmt.Println(map[string]interface{}{"id": book.ID.Hex(), "name": book.BookName, "author": book.BookAuthor, "isbn": book.BookISBN, "pages": book.BookPages, "year": book.BookYear})
+
 		result, err := coll.InsertOne(context.TODO(), book)
 		if err != nil {
 			return c.JSON(304, map[string]string{"error": "failed to insert book"})
@@ -361,6 +360,8 @@ func main() {
 		// if !exists {
 		// 	return c.JSON(299, map[string]string{"error": "book does not exist"})
 		// }
+
+		fmt.Println(map[string]interface{}{"id": book.ID.Hex(), "name": book.BookName, "author": book.BookAuthor, "isbn": book.BookISBN, "pages": book.BookPages, "year": book.BookYear})
 
 		result, err := coll.UpdateOne(context.TODO(), bson.M{"_id": book.ID}, bson.M{"$set": book})
 
