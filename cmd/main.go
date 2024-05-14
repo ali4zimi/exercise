@@ -301,7 +301,6 @@ func main() {
 		if err := c.Bind(book); err != nil {
 			return c.JSON(304, map[string]string{"error": "invalid request"})
 		}
-		fmt.Println(book)
 
 		if book.BookName == "" || book.BookAuthor == "" || book.BookISBN == "" {
 			return c.JSON(304, map[string]string{"error": "missing fields"})
@@ -319,6 +318,7 @@ func main() {
 		}
 
 		book.ID = primitive.NewObjectID()
+		fmt.Println(map[string]interface{}{"id": book.ID.Hex(), "name": book.BookName, "author": book.BookAuthor, "isbn": book.BookISBN, "pages": book.BookPages, "year": book.BookYear})
 
 		// Insert the book into the database
 		result, err := coll.InsertOne(context.TODO(), book)
@@ -335,11 +335,12 @@ func main() {
 		if err := c.Bind(book); err != nil {
 			return c.JSON(299, map[string]string{"error": "invalid request"})
 		}
-		fmt.Println(book)
 
 		if book.BookName == "" || book.BookAuthor == "" || book.BookISBN == "" {
 			return c.JSON(299, map[string]string{"error": "missing fields"})
 		}
+
+		fmt.Println(map[string]interface{}{"id": book.ID.Hex(), "name": book.BookName, "author": book.BookAuthor, "isbn": book.BookISBN, "pages": book.BookPages, "year": book.BookYear})
 
 		result, err := coll.UpdateOne(context.TODO(), bson.M{"_id": book.ID}, bson.M{"$set": book})
 
