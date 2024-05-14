@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"html/template"
 	"io"
@@ -23,11 +22,11 @@ import (
 // frontend or the database
 type BookStore struct {
 	ID         primitive.ObjectID `bson:"_id,omitempty"`
-	BookName   string
-	BookAuthor string
-	BookISBN   string
-	BookPages  int
-	BookYear   int
+	BookName   string             `json:"name"`
+	BookAuthor string             `json:"author"`
+	BookISBN   string             `json:"isbn"`
+	BookPages  int                `json:"pages"`
+	BookYear   int                `json:"year"`
 }
 
 // Wraps the "Template" struct to associate a necessary method
@@ -298,33 +297,39 @@ func main() {
 	})
 
 	e.POST("/api/books", func(c echo.Context) error {
-		// 1. Read the request body
-		decoder := json.NewDecoder(c.Request().Body)
-		var newBook BookStore
-		err := decoder.Decode(&newBook)
+		book := new(BookStore)
+		if err := c.Bind(book); err != nil {
+			return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid request"})
+		}
+
+		if book.BookName == "" || book.BookAuthor == "" || book.BookISBN == "" {
+			return c.JSON(304, map[string]string{"error": "missing fields"})
+		}
+
+		book.ID = primitive.NewObjectID()
+
+		// Insert the book into the database
+		result, err := coll.InsertOne(context.TODO(), book)
 		if err != nil {
-			return c.JSON(304, map[string]string{"error": "invalid json format"})
+			return c.JSON(http.StatusInternalServerError, map[string]string{"error": "failed to insert book"})
 		}
 
-		if newBook.BookName == "" || newBook.BookAuthor == "" || newBook.BookISBN == "" {
-			return c.JSON(304, map[string]string{"error": "name and author are required fields"})
-		}
-
-		if newBook.BookPages <= 0 {
-			return c.JSON(304, map[string]string{"error": "pages must be a positive number"})
-		}
-
-		if newBook.BookYear <= 0 {
-			return c.JSON(304, map[string]string{"error": "year must be a positive number"})
-		}
-
-		result, err := coll.InsertOne(context.TODO(), newBook)
-		if err != nil {
-			return c.JSON(http.StatusInternalServerError, map[string]string{"error": "error inserting book"})
-		}
-
-		return c.JSON(http.StatusCreated, map[string]string{"message": "book created successfully", "id": result.InsertedID.(primitive.ObjectID).Hex()})
+		return c.JSON(http.StatusOK, result)
 	})
 
+	e.DELETE("/api/books/:id", func(c echo.Context) error {
+		id, err := primitive.ObjectIDFromHex(c.Param("id"))
+		if err != nil {
+			return c.JSON(http.StatusNotModified, map[string]string{"error": "invalid id"})
+		}
+
+		result, err := coll.DeleteOne(context.TODO(), bson.M{"_id": id})
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, map[string]string{"error": "failed to delete book"})
+		}
+
+		return c.JSON(http.StatusOK, result)
+
+	})
 	e.Logger.Fatal(e.Start(":3030"))
 }

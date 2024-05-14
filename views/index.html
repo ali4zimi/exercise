@@ -80,7 +80,7 @@
     <th> {{ .pages }} </th>
     <th>
       <button hx-get="/edit/{{ .id }}" hx-target="#page-content" class="btn">Edit</button>
-      <button hx-delete="/api/books/{{ .id }}" hx-confirm="Are you sure you want to delete?" hx-target="#page-content" class="btn">Delete</button>
+      <button hx-delete="/api/books/{{ .id }}" hx-target="#page-content" class="btn">Delete</button>
     </th>
   </tr>
   {{ end }}
