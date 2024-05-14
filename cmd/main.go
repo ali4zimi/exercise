@@ -314,9 +314,9 @@ func main() {
 			return c.JSON(304, map[string]string{"error": "invalid request"})
 		}
 
-		if book.BookName == "" || book.BookAuthor == "" || book.BookISBN == "" {
-			return c.JSON(304, map[string]string{"error": "missing fields"})
-		}
+		// if book.BookName == "" || book.BookAuthor == "" || book.BookISBN == "" {
+		// 	return c.JSON(304, map[string]string{"error": "missing fields"})
+		// }
 
 		book.ID = primitive.NewObjectID()
 
