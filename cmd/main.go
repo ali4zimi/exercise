@@ -298,6 +298,7 @@ func main() {
 
 	e.POST("/api/books", func(c echo.Context) error {
 		book := new(BookStore)
+		fmt.Println(book)
 		if err := c.Bind(book); err != nil {
 			return c.JSON(304, map[string]string{"error": "invalid request"})
 		}
@@ -325,12 +326,12 @@ func main() {
 			return c.JSON(304, map[string]string{"error": "failed to insert book"})
 		}
 
-		fmt.Println(book)
 		return c.JSON(http.StatusOK, result)
 	})
 
 	e.PUT("/api/books", func(c echo.Context) error {
 		book := new(BookStore)
+		fmt.Println(book)
 
 		if err := c.Bind(book); err != nil {
 			return c.JSON(299, map[string]string{"error": "invalid request"})
@@ -346,7 +347,6 @@ func main() {
 			return c.JSON(299, map[string]string{"error": "failed to update book"})
 		}
 
-		fmt.Println(book)
 		return c.JSON(http.StatusOK, result)
 	})
 
