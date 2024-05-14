@@ -173,6 +173,18 @@ func findAllBooks(coll *mongo.Collection) []map[string]interface{} {
 	return ret
 }
 
+func hasDuplicate(coll *mongo.Collection, book BookStore) (bool, error) {
+	filter := bson.M{
+		"bookname":   book.BookName,
+		"bookauthor": book.BookAuthor,
+		"bookpages":  book.BookPages,
+		"bookyear":   book.BookYear,
+		"isbn":       book.BookISBN,
+	}
+	count, err := coll.CountDocuments(context.TODO(), filter)
+	return count > 0, err
+}
+
 func main() {
 	// Connect to the database. Such defer keywords are used once the local
 	// context returns; for this case, the local context is the main function
@@ -302,22 +314,19 @@ func main() {
 			return c.JSON(304, map[string]string{"error": "invalid request"})
 		}
 
-		if book.BookName == "" || book.BookAuthor == "" || book.BookISBN == "" || book.BookPages <= 0 || book.BookYear <= 0 {
+		if book.BookName == "" || book.BookAuthor == "" || book.BookISBN == "" {
 			return c.JSON(304, map[string]string{"error": "missing fields"})
-		}
-
-		books := findAllBooks(coll)
-
-		for _, b := range books {
-			if b["name"] == book.BookName && b["author"] == book.BookAuthor && b["isbn"] == book.BookISBN && b["pages"] == book.BookPages && b["year"] == book.BookYear {
-				return c.JSON(304, "book already exists")
-
-			}
 		}
 
 		book.ID = primitive.NewObjectID()
 
 		fmt.Println(map[string]interface{}{"id": book.ID.Hex(), "name": book.BookName, "author": book.BookAuthor, "isbn": book.BookISBN, "pages": book.BookPages, "year": book.BookYear})
+
+		duplicate, err := hasDuplicate(coll, *book)
+
+		if duplicate || err != nil {
+			return c.JSON(304, map[string]string{"error": "book already exists"})
+		}
 
 		result, err := coll.InsertOne(context.TODO(), book)
 		if err != nil {
@@ -332,36 +341,16 @@ func main() {
 
 		if err := c.Bind(book); err != nil {
 			return c.JSON(299, map[string]string{"error": "invalid request"})
+
 		}
 
-		// check if the book exists
-		// books := findAllBooks(coll)
-
-		// if book.BookName == "" || book.BookAuthor == "" || book.BookISBN == "" || book.BookPages <= 0 || book.BookYear <= 0 {
-		// 	return c.JSON(299, map[string]string{"error": "missing fields"})
-		// }
-
-		// exists := false
-		// for _, b := range books {
-		// 	if b["id"] == book.ID.Hex() {
-		// 		exists = true
-		// 		break
-		// 	}
-		// }
-
-		// for _, b := range books {
-		// 	if b["name"] == book.BookName && b["author"] == book.BookAuthor && b["isbn"] == book.BookISBN && b["pages"] == book.BookPages && b["year"] == book.BookYear {
-		// 		// return 200
-		// 		return c.JSON(304, "book already exists")
-
-		// 	}
-		// }
-
-		// if !exists {
-		// 	return c.JSON(299, map[string]string{"error": "book does not exist"})
-		// }
-
 		fmt.Println(map[string]interface{}{"id": book.ID.Hex(), "name": book.BookName, "author": book.BookAuthor, "isbn": book.BookISBN, "pages": book.BookPages, "year": book.BookYear})
+
+		duplicate, err := hasDuplicate(coll, *book)
+
+		if duplicate || err != nil {
+			return c.JSON(299, map[string]string{"error": "book already exists"})
+		}
 
 		result, err := coll.UpdateOne(context.TODO(), bson.M{"_id": book.ID}, bson.M{"$set": book})
 
