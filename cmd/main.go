@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"html/template"
 	"io"
@@ -296,23 +297,26 @@ func main() {
 		return c.JSON(http.StatusOK, book_str)
 	})
 
-	// Here we define post which receives a JSON object and inserts it into the
-	// database. We use the "BookStore" struct to define the structure of the
-	// JSON object we expect to receive.
-
 	e.POST("/api/books", func(c echo.Context) error {
-		book := new(BookStore)
-		if err = c.Bind(book); err != nil {
-			return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid request"})
-		}
-
-		result, err := coll.InsertOne(context.TODO(), book)
-
+		// 1. Read the request body
+		decoder := json.NewDecoder(c.Request().Body)
+		var newBook BookStore
+		err := decoder.Decode(&newBook)
 		if err != nil {
-			return c.JSON(http.StatusInternalServerError, map[string]string{"error": "could not insert book"})
+			return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid json format"})
 		}
 
-		return c.JSON(http.StatusCreated, map[string]string{"id": result.InsertedID.(primitive.ObjectID).Hex()})
+		// 2. Validate the data (optional)
+		// You can add checks here to ensure required fields are present and have valid values
+
+		// 3. Insert the new book into the database
+		result, err := coll.InsertOne(context.TODO(), newBook)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, map[string]string{"error": "error inserting book"})
+		}
+
+		// 4. Respond with success message or the newly created book data
+		return c.JSON(http.StatusCreated, map[string]string{"message": "book created successfully", "id": result.InsertedID.(primitive.ObjectID).Hex()})
 	})
 
 	e.Logger.Fatal(e.Start(":3030"))
