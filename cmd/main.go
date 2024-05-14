@@ -336,7 +336,7 @@ func main() {
 		}
 
 		// check if the book exists
-		books := findAllBooks(coll)
+		// books := findAllBooks(coll)
 
 		if book.BookName == "" || book.BookAuthor == "" || book.BookISBN == "" || book.BookPages <= 0 || book.BookYear <= 0 {
 			return c.JSON(299, map[string]string{"error": "missing fields"})
