@@ -342,26 +342,26 @@ func main() {
 			return c.JSON(299, map[string]string{"error": "missing fields"})
 		}
 
-		exists := false
-		for _, b := range books {
-			if b["id"] == book.ID.Hex() {
-				exists = true
-				break
-			}
-		}
+		// exists := false
+		// for _, b := range books {
+		// 	if b["id"] == book.ID.Hex() {
+		// 		exists = true
+		// 		break
+		// 	}
+		// }
 
-		for _, b := range books {
-			if b["name"] == book.BookName && b["author"] == book.BookAuthor && b["isbn"] == book.BookISBN && b["pages"] == book.BookPages && b["year"] == book.BookYear {
-				// return 200
-				return c.JSON(304, "book already exists")
+		// for _, b := range books {
+		// 	if b["name"] == book.BookName && b["author"] == book.BookAuthor && b["isbn"] == book.BookISBN && b["pages"] == book.BookPages && b["year"] == book.BookYear {
+		// 		// return 200
+		// 		return c.JSON(304, "book already exists")
 
-			}
-		}
+		// 	}
+		// }
 
-		if !exists {
-			return c.JSON(299, map[string]string{"error": "book does not exist"})
+		// if !exists {
+		// 	return c.JSON(299, map[string]string{"error": "book does not exist"})
+		// }
 
-		}
 		result, err := coll.UpdateOne(context.TODO(), bson.M{"_id": book.ID}, bson.M{"$set": book})
 
 		if err != nil {
