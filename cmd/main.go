@@ -318,13 +318,11 @@ func main() {
 			return c.JSON(304, map[string]string{"error": "year must be a positive number"})
 		}
 
-		// 3. Insert the new book into the database
 		result, err := coll.InsertOne(context.TODO(), newBook)
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, map[string]string{"error": "error inserting book"})
 		}
 
-		// 4. Respond with success message or the newly created book data
 		return c.JSON(http.StatusCreated, map[string]string{"message": "book created successfully", "id": result.InsertedID.(primitive.ObjectID).Hex()})
 	})
 
