@@ -318,7 +318,6 @@ func main() {
 		}
 
 		book.ID = primitive.NewObjectID()
-		fmt.Println(map[string]interface{}{"id": book.ID.Hex(), "name": book.BookName, "author": book.BookAuthor, "isbn": book.BookISBN, "pages": book.BookPages, "year": book.BookYear})
 
 		// Insert the book into the database
 		result, err := coll.InsertOne(context.TODO(), book)
@@ -336,11 +335,19 @@ func main() {
 			return c.JSON(299, map[string]string{"error": "invalid request"})
 		}
 
-		if book.BookName == "" || book.BookAuthor == "" || book.BookISBN == "" {
+		if book.BookName == "" || book.BookAuthor == "" || book.BookISBN == "" || book.BookPages == 0 || book.BookYear == 0 {
 			return c.JSON(299, map[string]string{"error": "missing fields"})
 		}
 
-		fmt.Println(map[string]interface{}{"id": book.ID.Hex(), "name": book.BookName, "author": book.BookAuthor, "isbn": book.BookISBN, "pages": book.BookPages, "year": book.BookYear})
+		books := findAllBooks(coll)
+
+		for _, b := range books {
+			if b["name"] == book.BookName && b["author"] == book.BookAuthor && b["isbn"] == book.BookISBN && b["pages"] == book.BookPages && b["year"] == book.BookYear {
+				// return 200
+				return c.JSON(304, "book already exists")
+
+			}
+		}
 
 		result, err := coll.UpdateOne(context.TODO(), bson.M{"_id": book.ID}, bson.M{"$set": book})
 
