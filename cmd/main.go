@@ -325,6 +325,7 @@ func main() {
 			return c.JSON(304, map[string]string{"error": "failed to insert book"})
 		}
 
+		fmt.Println(book)
 		return c.JSON(http.StatusOK, result)
 	})
 
@@ -345,22 +346,23 @@ func main() {
 			return c.JSON(299, map[string]string{"error": "failed to update book"})
 		}
 
+		fmt.Println(book)
 		return c.JSON(http.StatusOK, result)
 	})
 
 	e.DELETE("/api/books/:id", func(c echo.Context) error {
 		id, err := primitive.ObjectIDFromHex(c.Param("id"))
 		if err != nil {
-			return c.JSON(http.StatusNotModified, map[string]string{"error": "invalid id"})
+			return c.JSON(299, map[string]string{"error": "invalid id"})
 		}
 
 		result, err := coll.DeleteOne(context.TODO(), bson.M{"_id": id})
 		if err != nil {
-			return c.JSON(http.StatusInternalServerError, map[string]string{"error": "failed to delete book"})
+			return c.JSON(299, map[string]string{"error": "failed to delete book"})
 		}
 
 		return c.JSON(http.StatusOK, result)
-
 	})
+
 	e.Logger.Fatal(e.Start(":3030"))
 }
