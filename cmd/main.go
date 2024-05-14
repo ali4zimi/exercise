@@ -303,19 +303,19 @@ func main() {
 		var newBook BookStore
 		err := decoder.Decode(&newBook)
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid json format"})
+			return c.JSON(304, map[string]string{"error": "invalid json format"})
 		}
 
 		if newBook.BookName == "" || newBook.BookAuthor == "" || newBook.BookISBN == "" {
-			return c.JSON(http.StatusBadRequest, map[string]string{"error": "name and author are required fields"})
+			return c.JSON(304, map[string]string{"error": "name and author are required fields"})
 		}
 
 		if newBook.BookPages <= 0 {
-			return c.JSON(http.StatusBadRequest, map[string]string{"error": "pages must be a positive number"})
+			return c.JSON(304, map[string]string{"error": "pages must be a positive number"})
 		}
 
 		if newBook.BookYear <= 0 {
-			return c.JSON(http.StatusBadRequest, map[string]string{"error": "year must be a positive number"})
+			return c.JSON(304, map[string]string{"error": "year must be a positive number"})
 		}
 
 		// 3. Insert the new book into the database
