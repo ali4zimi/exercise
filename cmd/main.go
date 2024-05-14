@@ -314,10 +314,6 @@ func main() {
 			return c.JSON(304, map[string]string{"error": "invalid request"})
 		}
 
-		// if book.BookName == "" || book.BookAuthor == "" || book.BookISBN == "" {
-		// 	return c.JSON(304, map[string]string{"error": "missing fields"})
-		// }
-
 		book.ID = primitive.NewObjectID()
 
 		fmt.Println(map[string]interface{}{"id": book.ID.Hex(), "name": book.BookName, "author": book.BookAuthor, "isbn": book.BookISBN, "pages": book.BookPages, "year": book.BookYear})
